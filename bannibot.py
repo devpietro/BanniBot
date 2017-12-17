@@ -44,8 +44,8 @@ def main():
 
     while True:
         last_updates = greet_bot.get_updates(new_offset)
-	
-	for i in range(1, len(last_updates)):
+
+        for i in range(1, len(last_updates)):
             #last_update = greet_bot.get_last_update()
             last_update = last_updates[i]        
         
