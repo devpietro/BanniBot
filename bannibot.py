@@ -1,7 +1,7 @@
 import json
 import requests
 import time
-import urllib
+import urllib.parse
 
 TOKEN = "421565171:AAGLyYYO0gX3bHeaBhszF3KP53T1ys4Tk6s"
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
@@ -36,9 +36,14 @@ def get_last_update_id(updates):
 
 def echo_all(updates):
     for update in updates["result"]:
-        text = update["message"]["text"]
-        chat = update["message"]["chat"]["id"]
-        send_message(text, chat)
+        try:
+            text = update["message"]["text"]
+        except KeyError as err:
+            # temp: handling sticker exception
+            print(err)
+        else:
+            chat = update["message"]["chat"]["id"]
+            send_message(text, chat)
 
 
 def get_last_chat_id_and_text(updates):
@@ -50,7 +55,7 @@ def get_last_chat_id_and_text(updates):
 
 
 def send_message(text, chat_id):
-    #text = urllib.parse.quote_plus(text)
+    text = urllib.parse.quote_plus(text)
     url = URL + "sendMessage?text={}&chat_id={}".format(text, chat_id)
     get_url(url)
 
