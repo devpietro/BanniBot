@@ -7,23 +7,43 @@ import datetime
 TOKEN = "421565171:AAGLyYYO0gX3bHeaBhszF3KP53T1ys4Tk6s"
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
-def get_url(url):
-    response = requests.get(url)
-    content = response.content.decode("utf8")
-    return content
+class Bot:
+    def __init__(self, token):
+        self.token = token
+        self.api_url = "https://api.telegram.org/bot{}/".format(token)
 
-def get_json_from_url(url):
-    content = get_url(url)
-    js = json.loads(content)
-    return js
+    def get_updates(self, offset=None, timeout=30):
+        method = 'getUpdates'
+        params = {'timeout': timeout, 'offset': offset}
+        url = self.api_url + "getUpdates"
+        url += "?timeout={}".format(timeout)
+        if offset:
+            url += "&offset={}".format(offset)
+        #print(url)
+        # get url
+        resp = requests.get(url)
+        # get json from url
+        content = resp.content.decode("utf8")
+        js_res = json.loads(content)
+        #js = resp.json()["result"]
+        return js_res
 
-def get_updates(offset=None, timeout=30):
-    url = URL + "getUpdates"
-    url += "?timeout={}".format(timeout)
-    if offset:
-        url += "&offset={}".format(offset)
-    js = get_json_from_url(url)
-    return js
+    def send_message(self, text, chat_id):
+        #params = {'chat_id': chat_id, 'text': text}
+        #method = 'sendMessage'
+        #resp = requests.post(self.api_url + method, params)
+        text = urllib.parse.quote_plus(text)
+        url = URL + "sendMessage?text={}&chat_id={}".format(text, chat_id)
+        resp = requests.post(url)
+        return resp
+
+    def get_last_update(self):
+        get_result = self.get_updates()        
+        if len(get_result) > 0:
+            last_update = get_result[-1]
+        else:
+            last_update = get_result[len(get_result)]
+        return last_update
 
 def get_last_update_id(updates):
     update_ids = []
@@ -31,41 +51,19 @@ def get_last_update_id(updates):
         update_ids.append(int(update["update_id"]))
     return max(update_ids)
 
-def echo_all(updates):
-    for update in updates["result"]:
-        try:
-            text = update["message"]["text"]
-        except KeyError as err:
-            # temp: handling sticker exception
-            print(err)
-        else:
-            chat = update["message"]["chat"]["id"]
-            send_message(text, chat)
-
-def get_last_chat_id_and_text(updates):
-    num_updates = len(updates["result"])
-    last_update = num_updates - 1
-    text = updates["result"][last_update]["message"]["text"]
-    chat_id = updates["result"][last_update]["message"]["chat"]["id"]
-    return (text, chat_id)
-
-def send_message(text, chat_id):
-    text = urllib.parse.quote_plus(text)
-    url = URL + "sendMessage?text={}&chat_id={}".format(text, chat_id)
-    get_url(url)
-
 def main():
     last_update_id = None
     greetings = ('hello', 'hi', 'greetings', 'sup', 'ciao')
     now = datetime.datetime.now()
     today = now.day
     hour = now.hour
-    n = 0
+    banni = Bot(TOKEN)
+
     while True:
-        updates = get_updates(last_update_id)
+        #updates = get_updates(last_update_id)
+        updates = banni.get_updates(last_update_id)
         if len(updates["result"]) > 0:
             last_update_id = get_last_update_id(updates) + 1
-            #echo_all(updates)
 
             for update in updates["result"]:
                 try:
@@ -89,8 +87,9 @@ def main():
                         send_text = 'Good Evening {}'.format(name)
                         #today += 1#
                     else:
+                        # echo last message
                         send_text = text
-                send_message(send_text, chat)
+                banni.send_message(send_text, chat)
 
         time.sleep(0.5)
 
