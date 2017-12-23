@@ -13,8 +13,6 @@ class Bot:
         self.api_url = "https://api.telegram.org/bot{}/".format(token)
 
     def get_updates(self, offset=None, timeout=30):
-        method = 'getUpdates'
-        params = {'timeout': timeout, 'offset': offset}
         url = self.api_url + "getUpdates"
         url += "?timeout={}".format(timeout)
         if offset:
@@ -24,9 +22,9 @@ class Bot:
         resp = requests.get(url)
         # get json from url
         content = resp.content.decode("utf8")
-        js_res = json.loads(content)
-        #js = resp.json()["result"]
-        return js_res
+        js = json.loads(content)
+        # res = resp.json()["result"]
+        return js
 
     def send_message(self, text, chat_id):
         #params = {'chat_id': chat_id, 'text': text}
@@ -45,25 +43,53 @@ class Bot:
             last_update = get_result[len(get_result)]
         return last_update
 
-def get_last_update_id(updates):
-    update_ids = []
-    for update in updates["result"]:
-        update_ids.append(int(update["update_id"]))
-    return max(update_ids)
+    def get_name(self, update):
+        if update["message"]["chat"]["type"]=="group":
+            name = update["message"]['from']['first_name']
+            # NB 'language_code' and 'last_name' are also sometimes
+            # arguments under ['from'] but not always
+        else:
+            name = update["message"]["chat"]['first_name']
+        return name
+        
+    def is_fedro(self, update):
+        res = False        
+        if update['message']['chat']['type']=='group':
+            if update['message']['chat']['title']=='Il mito di Fedro':
+                res = True
+        return res
+                
+def get_next_update_id(updates):
+    num = len(updates['result'])
+    if num == 0:
+        next_up = None
+    else: 
+        next_up = int(updates["result"][num-1]["update_id"]) + 1
+#    update_ids = []
+#    for update in updates["result"]:
+#        update_ids.append(int(update["update_id"]))
+#    if len(update_ids)==0:
+#        last = 0
+#    else:
+#        last = max(update_ids)
+    return next_up
 
 def main():
-    last_update_id = None
+    next_update_id = None
     greetings = ('hello', 'hi', 'greetings', 'sup', 'ciao')
-    now = datetime.datetime.now()
-    today = now.day
-    hour = now.hour
     banni = Bot(TOKEN)
+    #reset updates received while not online
+    updates = banni.get_updates(next_update_id)
+    next_update_id = get_next_update_id(updates)
 
     while True:
-        #updates = get_updates(last_update_id)
-        updates = banni.get_updates(last_update_id)
+        now = datetime.datetime.now()
+        today = now.day
+        hour = now.hour
+        updates = banni.get_updates(next_update_id)
+
         if len(updates["result"]) > 0:
-            last_update_id = get_last_update_id(updates) + 1
+            next_update_id = get_next_update_id(updates)
 
             for update in updates["result"]:
                 try:
@@ -73,7 +99,7 @@ def main():
                     print(err)
                 else:
                     chat = update["message"]["chat"]["id"]
-                    name = update["message"]['chat']['first_name']
+                    name = banni.get_name(update)
                     
                     if text.lower() in greetings and today == now.day and 6 <= hour < 12:
                         send_text = 'Good Morning {}'.format(name)
