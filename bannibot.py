@@ -34,6 +34,13 @@ class Bot:
         url = URL + "sendMessage?text={}&chat_id={}".format(text, chat_id)
         resp = requests.post(url)
         return resp
+   
+    def send_sticker(self, sticker_id, chat_id):
+        url = self.api_url + 'sendSticker'
+        url += '?chat_id={}'.format(chat_id)
+        url += '&sticker={}'.format(sticker_id)
+        resp = requests.post(url)
+        return resp  
 
     def get_last_update(self):
         get_result = self.get_updates()        
@@ -83,8 +90,8 @@ def get_next_update_id(updates):
     return next_up
 
 def main():
-    group_perm = False
-    greetings = ('hello', 'hi', 'greetings', 'sup', 'ciao')
+    group_perm = True
+    greetings = ('hello', 'hi', 'greetings', 'ciao')
     wished = []
 
     next_update_id = None
@@ -105,35 +112,43 @@ def main():
             for update in updates["result"]:
 
                 chat = update["message"]["chat"]["id"]
-                
-                if now.day == 24 and now.month == 12:
-                    name = banni.get_name(update)
+                name = banni.get_name(update)
+              
+                if now.day == 25 and now.month == 12:
                     if not (name in wished):
-                        send_text = 'Buon Natale ' + name + '!'
                         wished.append(name)
+                        send_text = 'Felice Natale ' + name + '!'
                         banni.send_message(send_text, chat)
+                        if not (chat in wished):
+                            wished.append(chat)
+                            send_text_2 = 'https://www.youtube.com/watch?v=3nx7_G5R0oA'
+                            banni.send_message(send_text_2, chat)
+                        banni.send_sticker('CAADAgAD0QUAAvoLtgjYyEx1T51U2wI', chat)
                         # do this only and do it once
                         continue
-
-                name = banni.get_name(update)
                 
                 # greetings
                 if not banni.is_sticker(update):
                     text = update['message']['text']
-                    if text.lower() in greetings and today == now.day and 6 <= hour < 12:
-                        send_text = 'Good Morning {}'.format(name)
-                        #today += 1
-                    elif text.lower() in greetings and today == now.day and 12 <= hour < 17:
-                        send_text = 'Good Afternoon {}'.format(name)
-                        #today += 1
-                    elif text.lower() in greetings and today == now.day and 17 <= hour < 23:
-                        send_text = 'Good Evening {}'.format(name)
-                        #today += 1#
-                    else:
-                        # echo last message
-                        send_text = text
-                    if (not update["message"]["chat"]["type"]=="group") or group_perm:
-                        banni.send_message(send_text, chat)
+                    if any([greet in text.lower() for greet in greetings]):
+                        if today == now.day and 6 <= hour < 9:
+                            send_text = '{} il buongiorno si vede dal mattino'.format(name)
+                            #today += 1
+                        elif today == now.day and 12 <= hour < 17:
+                            send_text = 'Buon pomeriggio bello'.format(name)
+                            #today += 1
+                        elif today == now.day and 18 <= hour < 23:
+                            send_text = 'Buonasera caro {}'.format(name)
+                            #today += 1
+                        # else:
+                            # echo last message
+                            # send_text = text
+                        if (not update["message"]["chat"]["type"]=="group") or group_perm:
+                            banni.send_message(send_text, chat)
+                    
+                    if 'birra' in text.lower():
+                        banni.send_message('Chi invita Angelona?', chat)
+                        banni.send_sticker('CAADAgADhQADOQ-GAyBWCYCoan7eAg', chat)
 
         # before looking for the next update
         time.sleep(0.5)
