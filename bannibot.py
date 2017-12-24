@@ -58,6 +58,14 @@ class Bot:
             if update['message']['chat']['title']=='Il mito di Fedro':
                 res = True
         return res
+   
+    def is_sticker(self, update):
+        res = True
+        try:
+            temp = update['message']['sticker']
+        except KeyError as err:
+            res = False
+        return res
                 
 def get_next_update_id(updates):
     num = len(updates['result'])
@@ -75,8 +83,11 @@ def get_next_update_id(updates):
     return next_up
 
 def main():
-    next_update_id = None
+    group_perm = False
     greetings = ('hello', 'hi', 'greetings', 'sup', 'ciao')
+    wished = []
+
+    next_update_id = None
     banni = Bot(TOKEN)
     #reset updates received while not online
     updates = banni.get_updates(next_update_id)
@@ -92,31 +103,39 @@ def main():
             next_update_id = get_next_update_id(updates)
 
             for update in updates["result"]:
-                try:
-                    text = update["message"]["text"]
-                except KeyError as err:
-                    # temp: handling sticker exception
-                    print(err)
-                else:
-                    chat = update["message"]["chat"]["id"]
+
+                chat = update["message"]["chat"]["id"]
+                
+                if now.day == 24 and now.month == 12:
                     name = banni.get_name(update)
-                    
+                    if not (name in wished):
+                        send_text = 'Buon Natale ' + name + '!'
+                        wished.append(name)
+                        banni.send_message(send_text, chat)
+                        # do this only and do it once
+                        continue
+
+                name = banni.get_name(update)
+                
+                # greetings
+                if not banni.is_sticker(update):
+                    text = update['message']['text']
                     if text.lower() in greetings and today == now.day and 6 <= hour < 12:
                         send_text = 'Good Morning {}'.format(name)
                         #today += 1
-
                     elif text.lower() in greetings and today == now.day and 12 <= hour < 17:
                         send_text = 'Good Afternoon {}'.format(name)
                         #today += 1
-
                     elif text.lower() in greetings and today == now.day and 17 <= hour < 23:
                         send_text = 'Good Evening {}'.format(name)
                         #today += 1#
                     else:
                         # echo last message
                         send_text = text
-                banni.send_message(send_text, chat)
+                    if (not update["message"]["chat"]["type"]=="group") or group_perm:
+                        banni.send_message(send_text, chat)
 
+        # before looking for the next update
         time.sleep(0.5)
 
 
