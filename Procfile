@@ -1,1 +1,1 @@
-web: (python -m http.server $PORT &) && (python bannibot.py)
+worker: (python -m http.server $PORT &) && (python bannibot.py)
