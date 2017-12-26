@@ -4,7 +4,7 @@ import time
 import urllib.parse
 import datetime
 
-TOKEN = "421565171:AAGLyYYO0gX3bHeaBhszF3KP53T1ys4Tk6s"
+TOKEN = '421565171:AAFEGau2QXtKBBM4-RDG5j8Fu6YpYmW9WSA'
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
 class Bot:
@@ -99,6 +99,7 @@ def main():
     #reset updates received while not online
     updates = banni.get_updates(next_update_id)
     next_update_id = get_next_update_id(updates)
+    launch_min = datetime.datetime.now().min
 
     while True:
         now = datetime.datetime.now()
@@ -108,6 +109,7 @@ def main():
 
         if len(updates["result"]) > 0:
             next_update_id = get_next_update_id(updates)
+            flag_greet = 0
 
             for update in updates["result"]:
 
@@ -133,18 +135,19 @@ def main():
                     if any([greet in text.lower() for greet in greetings]):
                         if today == now.day and 6 <= hour < 9:
                             send_text = '{} il buongiorno si vede dal mattino'.format(name)
-                            #today += 1
+                            flag_greet = 1
                         elif today == now.day and 12 <= hour < 17:
                             send_text = 'Buon pomeriggio bello'.format(name)
-                            #today += 1
+                            flag_greet = 1
                         elif today == now.day and 18 <= hour < 23:
                             send_text = 'Buonasera caro {}'.format(name)
-                            #today += 1
+                            flag_greet = 1
                         # else:
                             # echo last message
                             # send_text = text
-                        if (not update["message"]["chat"]["type"]=="group") or group_perm:
-                            banni.send_message(send_text, chat)
+                        if flag_greet:
+                            if (not update["message"]["chat"]["type"]=="group") or group_perm:
+                                banni.send_message(send_text, chat)
                     
                     if 'birra' in text.lower():
                         banni.send_message('Chi invita Angelona?', chat)
