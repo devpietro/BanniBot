@@ -3,8 +3,10 @@ import requests
 import time
 import urllib.parse
 import datetime
+import os
 
-TOKEN = '421565171:AAFEGau2QXtKBBM4-RDG5j8Fu6YpYmW9WSA'
+TOKEN = os.environ.get('TOKEN')
+APPNAME = os.environ.get('APPNAME')
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
 class Bot:
