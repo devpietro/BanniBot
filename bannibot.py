@@ -97,7 +97,7 @@ def main():
     # some settings
     greetings = ('hello', 'hi', 'greetings', 'ciao')
     wished = []
-    launch_min = datetime.datetime.now().min
+    launch_min = datetime.datetime.now().minute
     next_update_id = None
 
     # create the bot
