@@ -92,16 +92,20 @@ def get_next_update_id(updates):
     return next_up
 
 def main():
-    group_perm = True
+    group_perm = True # permissive to send message to groups
+
+    # some settings
     greetings = ('hello', 'hi', 'greetings', 'ciao')
     wished = []
-
+    launch_min = datetime.datetime.now().min
     next_update_id = None
+
+    # create the bot
     banni = Bot(TOKEN)
+
     #reset updates received while not online
     updates = banni.get_updates(next_update_id)
     next_update_id = get_next_update_id(updates)
-    launch_min = datetime.datetime.now().min
 
     while True:
         now = datetime.datetime.now()
@@ -156,8 +160,11 @@ def main():
                         banni.send_sticker('CAADAgADhQADOQ-GAyBWCYCoan7eAg', chat)
 
         # before looking for the next update
-        time.sleep(0.5)
-
+        # time.sleep(0.5)
+        # every 15 min wake up the app (otherwise heroku puts it to sleep)
+        now_min = datetime.datetime.now().minute
+        if (now_min-launch_min)%15:
+            requests.get('http://'+APPNAME+'.heroku.app.com')
 
 if __name__ == '__main__':
     main()
