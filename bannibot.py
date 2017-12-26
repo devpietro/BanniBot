@@ -163,7 +163,8 @@ def main():
         # time.sleep(0.5)
         # every 15 min wake up the app (otherwise heroku puts it to sleep)
         now_min = datetime.datetime.now().minute
-        if (now_min-launch_min)%15:
+        if (now_min-launch_min)%2==0:
+            print("Pinging")
             requests.get('http://'+APPNAME+'.heroku.app.com')
 
 if __name__ == '__main__':
