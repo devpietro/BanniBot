@@ -122,7 +122,15 @@ def main():
                 chat = update["message"]["chat"]["id"]
                 name = banni.get_name(update)
               
-                if now.day == 25 and now.month == 12:
+                if now.day == 1 and now.month == 1:
+                    if not (name in wished):
+                        wished.append(name)
+                        send_text = 'Un anno più vicini eh?'
+                        banni.send_message(send_text, chat)
+                        # waving death
+                        banni.send_sticker('CAADAgADuwUAAvoLtggGKjKfVlb_hAI', chat)
+                        continue
+                elif now.day == 25 and now.month == 12:
                     if not (name in wished):
                         wished.append(name)
                         send_text = 'Felice Natale ' + name + '!'
@@ -131,14 +139,18 @@ def main():
                             wished.append(chat)
                             send_text_2 = 'https://www.youtube.com/watch?v=3nx7_G5R0oA'
                             banni.send_message(send_text_2, chat)
+                        # Merkel drinking
                         banni.send_sticker('CAADAgAD0QUAAvoLtgjYyEx1T51U2wI', chat)
                         # do this only and do it once
                         continue
-                elif now.day == 29 and now.month == 12:
+                elif now.day == 31 and now.month == 12:
                     if not (name in wished):
                         wished.append(name)
-                        send_text = 'Èppi niu íar ' + name + '!'
+                        send_text = 'Buona fine e miglior inizio ' + name + '!'
+                        wished.append(chat)
                         banni.send_message(send_text, chat)
+                        # Merkel cheering with beer
+                        banni.send_sticker('CAADAgADgwADOQ-GA9ZTbnrjNkZDAg', chat)
                         continue
                 else:
                     # if it's any other day cancel the 'wished' list
