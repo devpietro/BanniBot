@@ -94,7 +94,7 @@ def get_next_update_id(updates):
 def main():
     group_perm = True # permissive to send message to groups
 
-    # some settings
+    # some settings and initialization
     greetings = ('hello', 'hi', 'greetings', 'ciao')
     wished = []
     launch_min = datetime.datetime.now().minute
@@ -134,6 +134,15 @@ def main():
                         banni.send_sticker('CAADAgAD0QUAAvoLtgjYyEx1T51U2wI', chat)
                         # do this only and do it once
                         continue
+                elif now.day == 29 and now.month == 12:
+                    if not (name in wished):
+                        wished.append(name)
+                        send_text = 'Èppi niu íar ' + name + '!'
+                        banni.send_message(send_text, chat)
+                        continue
+                else:
+                    # if it's any other day cancel the 'wished' list
+                    wished = []
                 
                 # greetings
                 if not banni.is_sticker(update):
