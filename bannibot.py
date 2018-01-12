@@ -5,7 +5,12 @@ import urllib.parse
 import datetime
 import os
 
-TOKEN = os.environ.get('TOKEN')
+try:
+    fileToken = open("token", "r") 
+    TOKEN = fileToken.read().rstrip("\n").rstrip("\r")
+    fileToken.close()
+except: 
+    TOKEN = os.environ.get('TOKEN')
 APPNAME = os.environ.get('APPNAME')
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
@@ -106,6 +111,8 @@ def main():
     #reset updates received while not online
     updates = banni.get_updates(next_update_id)
     next_update_id = get_next_update_id(updates)
+    
+    PappagalloMode = 0
 
     while True:
         now = datetime.datetime.now()
@@ -135,9 +142,10 @@ def main():
                         # do this only and do it once
                         continue
                 
-                # greetings
                 if not banni.is_sticker(update):
                     text = update['message']['text']
+                    
+                    # greetings
                     if any([greet in text.lower() for greet in greetings]):
                         if today == now.day and 6 <= hour < 9:
                             send_text = '{} il buongiorno si vede dal mattino'.format(name)
@@ -158,6 +166,18 @@ def main():
                     if 'birra' in text.lower():
                         banni.send_message('Chi invita Angelona?', chat)
                         banni.send_sticker('CAADAgADhQADOQ-GAyBWCYCoan7eAg', chat)
+                        
+                    # Pappagallo mode
+                    if "pappagallo" in text.lower():
+                        PappagalloMode = not PappagalloMode
+                        if PappagalloMode:
+                            print("PappagalloMode on")
+                            # banni.send_message("Inizio a fare il pappagallo", chat)     
+                        else:  
+                            print("PappagalloMode off")  
+                            # send_message("Smetto di fare il pappagallo", chat)                          
+                    if 	PappagalloMode:
+                        banni.send_message(text, chat)
 
         # before looking for the next update
         # time.sleep(0.5)
