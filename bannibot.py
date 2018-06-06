@@ -121,7 +121,8 @@ def main():
 
                 chat = update["message"]["chat"]["id"]
                 name = banni.get_name(update)
-              
+             
+                # action based on the calendar day only ------------------------------------------------
                 if now.day == 1 and now.month == 1:
                     if not (name in wished):
                         wished.append(name)
@@ -156,7 +157,7 @@ def main():
                     # if it's any other day cancel the 'wished' list
                     wished = []
                 
-                # greetings
+                # if the message wasn't a sticker ------------------------------------------------------
                 if not banni.is_sticker(update):
                     text = update['message']['text']
                     if any([greet in text.lower() for greet in greetings]):
@@ -179,6 +180,9 @@ def main():
                     if 'birra' in text.lower():
                         banni.send_message('Chi invita Angelona?', chat)
                         banni.send_sticker('CAADAgADhQADOQ-GAyBWCYCoan7eAg', chat)
+
+                    if 'marx' in text.lower():
+                        banni.send_sticker('CAADBAADMgADyIsGAAGw4osRBXRB3AI', chat)
 
         # before looking for the next update
         # time.sleep(0.5)
