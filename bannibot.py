@@ -75,7 +75,14 @@ class Bot:
         except KeyError as err:
             res = False
         return res
-                
+
+    def send_image(self, image_name, chat_id):
+         url = self.api_url + 'sendPhoto' + '?chat_id={}'.format(chat_id)
+         files = {'photo': open('./media/images/'+image_name, 'rb')}
+         #data = {'chat_id' : chat_id}
+         r = requests.post(url, files=files)
+         print(r.status_code, r.reason, r.content)
+    
 def get_next_update_id(updates):
     num = len(updates['result'])
     if num == 0:
@@ -183,6 +190,9 @@ def main():
 
                     if 'marx' in text.lower():
                         banni.send_sticker('CAADBAADMgADyIsGAAGw4osRBXRB3AI', chat)
+                    
+                    if 'general' in text.lower():
+                        banni.send_image('GE_Red.png', chat)
 
         # before looking for the next update
         # time.sleep(0.5)
