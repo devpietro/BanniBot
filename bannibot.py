@@ -4,6 +4,7 @@ import time
 import urllib.parse
 import datetime
 import os
+import random
 
 TOKEN = os.environ.get('TOKEN')
 APPNAME = os.environ.get('APPNAME')
@@ -76,8 +77,11 @@ class Bot:
             res = False
         return res
 
-    def send_image(self, image_name, chat_id):
-         url = self.api_url + 'sendPhoto' + '?chat_id={}'.format(chat_id)
+    def send_image(self, image_name, chat_id, caption=None):
+         url = self.api_url + 'sendPhoto' 
+         url += '?chat_id={}'.format(chat_id)
+         if caption is not None:
+             url += ('&caption=' + caption) 
          files = {'photo': open('./media/images/'+image_name, 'rb')}
          #data = {'chat_id' : chat_id}
          r = requests.post(url, files=files)
@@ -98,6 +102,9 @@ def get_next_update_id(updates):
 #        last = max(update_ids)
     return next_up
 
+# ------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------
+
 def main():
     group_perm = True # permissive to send message to groups
 
@@ -106,6 +113,8 @@ def main():
     wished = []
     launch_min = datetime.datetime.now().minute
     next_update_id = None
+    f = open('./media/dante_comedia.txt')
+    comedia_lines = f.readlines()
 
     # create the bot
     banni = Bot(TOKEN)
@@ -191,8 +200,18 @@ def main():
                     if 'marx' in text.lower():
                         banni.send_sticker('CAADBAADMgADyIsGAAGw4osRBXRB3AI', chat)
                     
-                    if 'general' in text.lower():
-                        banni.send_image('GE_Red.png', chat)
+                    if 'general' in text.lower() and 'electric' in text.lower() or 'GE' in text:
+                        banni.send_image('GE_Red.png', chat, 'I love that company!')
+                 
+                    poetry = ('poem','poetry','poesia')
+                    if any([x in text.lower() for x in poetry]):
+                        i = random.randint(1, 19688)
+                        while comedia_lines[i]=='\n' or comedia_lines[i+1]=='\n' or comedia_lines[i+2]=='\n':
+                            i += 1
+                        banni.send_message('Learn, this is real poetry...', chat)
+                        banni.send_message(comedia_lines[i], chat)
+                        banni.send_message(comedia_lines[i+1], chat)
+                        banni.send_message(comedia_lines[i+2], chat)
 
         # before looking for the next update
         # time.sleep(0.5)
